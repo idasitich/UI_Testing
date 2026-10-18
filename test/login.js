@@ -42,10 +42,21 @@ describe("Open Sauce Demo", function () {
             true
         );
 
-        // Assert 2: Nyocokin Tittle
-        let title = await driver.getTitle();
-        assert.strictEqual(title, "List Users");
+        // Assert 2: Nyocokin H2 Title
+        // 1. Mencari elemen h2 menggunakan CSS Selector (disarankan menggunakan tag h2 atau gabungan atribut Vue)
+        let headerElement = await driver.findElement(
+            By.css('h2[data-v-e206bbd6]')
+        );
 
+        // 2. Mengambil teks dari elemen tersebut
+        let actualText = await headerElement.getText();
+
+        // 3. Melakukan Assertion (Memastikan teks sesuai dengan "List Users")
+        assert.strictEqual(
+            actualText, 
+            'ListUsers', 
+            `Assertion Gagal! Teks yang ditemukan adalah: "${actualText}"`
+        );
         await driver.quit();
 
     });
