@@ -1,33 +1,40 @@
 const { Builder, By, until } = require("selenium-webdriver");
 const assert = require("assert");
 const chrome = require("selenium-webdriver/chrome");
+const console = require("console");
+const { not } = require("ajv/dist/compile/codegen");
 
-describe("Open Sauce Demo", function () {
-    it("Login", async function () {
 
-        let options = new chrome.Options();
-        let driver = await new Builder()
+let driver;
+let options = new chrome.Options();
+
+async function login(driver) {
+    await driver.get("https://belajar-bareng.onrender.com/");
+
+    await driver.findElement(
+        By.xpath("//input[@data-testid='username-input']")
+    ).sendKeys("admin");
+
+    await driver.findElement(
+        By.xpath("//input[@data-testid='password-input']")
+    ).sendKeys("admin");
+
+    await driver.findElement(
+        By.xpath("//button[@data-testid='login-button']")
+    ).click();
+}
+
+ beforeEach(async function () {
+        driver = await new Builder()
             .forBrowser("chrome")
             .setChromeOptions(options)
             .build();
 
-        await driver.get("https://belajar-bareng.onrender.com/");
+            await login(driver);
+    });
 
-        let usernameInput = await driver.findElement(
-            By.xpath("//input[@data-testid = 'username-input']")
-        );
-         let passwordInput  = await driver.findElement(
-            By.xpath("//input[@data-testid = 'password-input']")
-        );
-          let loginButton  = await driver.findElement(
-            By.xpath("//button[@data-testid = 'login-button']")
-        );
-
-        await usernameInput.sendKeys("admin");
-        await passwordInput.sendKeys("admin");
-        await loginButton.click();
-
-        await driver.sleep(3000);
+describe("", function () {
+    it("Login", async function () {
 
         // Assert 1: CheckOut Button
         let checkout_button = await driver.wait(
@@ -48,16 +55,57 @@ describe("Open Sauce Demo", function () {
             By.css('h2[data-v-e206bbd6]')
         );
 
-        // 2. Mengambil teks dari elemen tersebut
+        // Mengambil teks dari elemen tersebut
         let actualText = await headerElement.getText();
 
-        // 3. Melakukan Assertion (Memastikan teks sesuai dengan "List Users")
+        //Melakukan Assertion (Memastikan teks sesuai dengan "List Users")
         assert.strictEqual(
             actualText, 
-            'ListUsers', 
+            'List Users', 
             `Assertion Gagal! Teks yang ditemukan adalah: "${actualText}"`
         );
-        await driver.quit();
+        // await driver.quit();
 
     });
+    it("Add User", async function (){
+
+        let addButton = await driver.wait(
+            until.elementLocated(By.xpath("//*[@data-testid = 'add-button']")),
+            1000
+        );
+        
+        await addButton.click();
+        await driver.sleep(3000);
+        
+        let username = await driver.findElement(
+        By.xpath("//input[@data-testid='username-input']"))
+         
+        let age = await driver.findElement(
+        By.xpath("//input[@data-testid='age-input']"))
+
+        let buttonSubmit = await driver.findElement(
+        By.xpath("//button[@type= 'submit']"))
+         
+        await username.sendKeys('Andrea');
+        await age.sendKeys('60');
+        await buttonSubmit.click();
+
+        let nama = await username.getAttribute('value');
+
+        // Memvalidasi dengan notifikasi user added successful
+        let toastMessage = await driver.wait(
+        until.elementLocated(By.xpath("//div[@data-testid='toast-content']")),
+        10000  );
+
+        await driver.wait(until.elementIsVisible(toastMessage), 5000);
+
+        let actualText = await toastMessage.getText();
+        console.log(nama)
+        console.log(actualText)
+
+        assert.strictEqual(
+        actualText,
+        `User successfully added, Hi ${nama}!`, // Expected text
+        );
+    })
 });
